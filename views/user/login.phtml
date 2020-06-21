@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>登录个人网盘</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="shortcut icon" href="/ico/favicon.ico">
+    <link rel="stylesheet" href="/css/twitter-bootstrap/3.4.1/bootstrap.min.css">
+    <script src="/js/jquery/1.12.4/jquery.min.js"></script>
+    <script src="/js/twitter-bootstrap/3.4.1/bootstrap.min.js"></script>
+    <style type="text/css">
+        #loginBtn, #toRegBtn {
+            width: 90%;
+            height: 100%;
+        }
+
+        label.control-label {
+            padding-bottom: 0.3em;
+            padding-left: 0.2em;
+        }
+
+        .glyphicon {
+            margin-top: 0.4em;
+        }
+
+        #pic-title {
+            height: 6em;
+        }
+
+        @media screen and (min-width: 768px) {
+            #pic-title {
+                height: 8em;
+            }
+        }
+    </style>
+    <script type="text/javascript">
+        var logging = false;
+
+        $(function () {
+            var usernameInput = $('#username');
+
+            usernameInput.focus();
+
+            usernameInput.keydown(function (e) {
+                if (e.keyCode === 13) {
+                    $('#loginBtn').click();
+                    return false;
+                } else {
+                    return true;
+                }
+            });
+
+            $('#password').keydown(function (e) {
+                if (e.keyCode === 13) {
+                    $('#loginBtn').click();
+                    return false;
+                } else {
+                    return true;
+                }
+            });
+
+            $('#toRegBtn').bind('click', function () {
+                window.location.replace('/user/register');
+            });
+
+            $('#loginBtn').bind('click', function () {
+                if (!logging) {
+                    logging = true;
+                    var info = $('#info');
+                    var username = $($('#username')).val();
+                    var password = $($('#password')).val();
+                    if (username === '' || password === '') {
+                        info.text('输入为空');
+                        logging = false;
+                        return;
+                    }
+
+                    info.text('登录中..');
+
+                    $.ajax({
+                        url: '/user/login.do',
+                        type: 'POST',
+                        data: {username: username, password: password},
+                        dataType: 'json',
+                        cache: false,
+                        success: function (data) {
+                            if (data.code === 0) {
+                                $('#info').text('成功，正在进入..');
+                                // $('#loginForm').submit();
+                                $('.theTips').addClass('has-success').removeClass('has-error');
+                                $('#unameICO').addClass('glyphicon-ok').removeClass('glyphicon-remove');
+                                $('#passICO').addClass('glyphicon-ok').removeClass('glyphicon-remove');
+                                var logTimer = setInterval(function () {
+                                    clearInterval(logTimer);
+                                    window.location.href = '/user/home/index';
+                                }, 300);
+                            } else {
+                                $('#info').text(data.msg);
+                                $('.theTips').addClass('has-error').removeClass('has-success');
+                                $('#unameICO').addClass('glyphicon-remove').removeClass('glyphicon-ok');
+                                $('#passICO').addClass('glyphicon-remove').removeClass('glyphicon-ok');
+                                logging = false;
+                            }
+                        },
+                        error: function (e) {
+                            $('#info').text('服务器连接失败');
+                            logging = false;
+                        }
+                    });
+                }
+            });
+
+
+        });
+    </script>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div id="pic-title"></div>
+    </div>
+
+    <div class="row text-center">
+        <h2 id="info">登录个人网盘</h2>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-3 col-xs-1"></div>
+        <div class="col-sm-6 col-xs-10">
+            <form id="loginForm" action="/user/home/index" class="form-horizontal">
+
+                <div class="form-group has-feedback theTips">
+                    <label for="username" class="control-label">用户名</label>
+                    <input type="text" class="form-control" id="username" autocomplete="off">
+                    <span id="unameICO" class="glyphicon form-control-feedback" aria-hidden="true"></span>
+                </div>
+
+                <div class="form-group has-feedback theTips">
+                    <label for="password" class="control-label">密码</label>
+                    <input type="password" class="form-control" id="password" autocomplete="off">
+                    <span id="passICO" class="glyphicon form-control-feedback" aria-hidden="true"></span>
+                </div>
+
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-sm-2 col-xs-1"></div>
+                        <div class="col-sm-4 col-xs-5">
+                            <button id="loginBtn" type="button" class="btn btn-success">登录</button>
+                        </div>
+                        <div class="col-sm-4 col-xs-5">
+                            <button id="toRegBtn" type="button" class="btn btn-info">注册</button>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

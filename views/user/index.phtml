@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>个人网盘</title>
+
+    <link rel="shortcut icon" href="/ico/favicon.ico">
+    <link rel="stylesheet" href="/css/npm/font-awesome@4.7.0/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/twitter-bootstrap/3.4.1/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/index.css">
+    <script src="/js/jquery/1.12.4/jquery.min.js"></script>
+    <script src="/js/twitter-bootstrap/3.4.1/bootstrap.min.js"></script>
+    <script src="/js/alert.min.js"></script>
+    <script src="/js/spark-md5.min.js"></script>
+
+    <script type="text/javascript">
+        var reqContextPath = '';
+        var currentDirId = <?=$currentDirId?>;
+        var currentPage = <?=$currentPage?>;
+        var currentSort = <?=$currentSort?>;
+        var keywords = '<?=$keywords?>';
+        var isSearch = <?=$isSearch?>;
+    </script>
+    <script src="/js/index.js"></script>
+
+    <script src="/js/keep.js"></script>
+
+</head>
+<body>
+<div class="container">
+    <div class="row" id="nav">
+        <div class="col-sm-2 col-xs-1"></div>
+        <div id="search-div" class="col-sm-8 col-xs-8">
+            <form id="searchForm" class="form-inline">
+                <div class="form-group" id="searchFormGroup">
+                    <div class="col-sm-9 col-xs-6">
+                        <input value="<?=$keywords?>" name="keywords" type="text" class="form-control" id="searchText"
+                               autocomplete="off"
+                               placeholder="请输入关键词">
+                    </div>
+                    <div class="col-sm-3 col-xs-6">
+                        <button type="button" class="btn btn-success" id="searchBtn">搜索</button>
+                        <button type="button" class="btn btn-info" id="cancelSearchBtn">清空</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div id="searchForm-gap" class="col-sm-1"></div>
+        <div class="col-sm-1 col-xs-2 text-center">
+            <div class="row">
+                <button type="button" class="btn" id="personal" data-toggle="dropdown">
+                    我的
+                </button>
+                <ul class="dropdown-menu" id="personal-dropdown">
+                    <li><a href="/user/home/index">我的文件</a></li>
+                    <li><a href="/user/home/share">我的分享</a></li>
+                    <li><a href="/user/home/resetPassword">修改密码</a></li>
+                    <li><a href="/user/logout">注销登录</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-2 col-xs-12">
+            <div class="col-sm-12 col-xs-3" id="add-file-div">
+                <div class="dropdown">
+                    <button type="button" class="btn btn-success" data-toggle="dropdown" id="add-file-button">
+                        新建..
+                    </button>
+                    <ul class="dropdown-menu" id="add-file-dropdown">
+                        <li class="no-upload-dir"><a href="javascript:void(0)" id="a-upload-file">上传文件</a></li>
+                        <li class="uud no-upload-dir"><a href="javascript:void(0)" id="a-upload-dir">上传文件夹</a></li>
+                        <li class="divider no-upload-dir"></li>
+                        <li class="no-upload-dir"><a href="javascript:void(0)" id="a-upload-file-md5">秒传文件</a></li>
+                        <li class="uud no-upload-dir"><a href="javascript:void(0)" id="a-upload-dir-md5">秒传文件夹</a></li>
+                        <li class="divider no-upload-dir"></li>
+                        <li><a href="javascript:void(0)" id="a-upload-file-piece">上传文件</a></li>
+                        <li class="uud <?=$hiddenLi?>"><a href="javascript:void(0)" id="a-upload-dir-piece">上传文件夹</a></li>
+                        <li class="divider"></li>
+                        <li><a href="javascript:void(0)" id="a-upload-file-piece-md5">秒传文件</a></li>
+                        <li class="uud <?=$hiddenLi?>"><a href="javascript:void(0)" id="a-upload-dir-piece-md5">秒传文件夹</a>
+                        </li>
+                        <li class="divider"></li>
+                        <li><a href="javascript:void(0)" id="createNewDir">新建文件夹</a></li>
+                        <li class="divider"></li>
+                        <li><a href="javascript:void(0)" id="createOfflineView">新建离线下载</a></li>
+                    </ul>
+                </div>
+            </div>
+
+
+            <div class="col-sm-12 col-xs-9">
+                <div class="panel-group" id="accordion">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a class="btn" href="#collapse0" data-toggle="collapse"
+                                   data-parent="#accordion">操作</a>
+                            </h4>
+                        </div>
+                        <div id="collapse0" class="panel-collapse collapse">
+                            <div class="panel-body"><a id="multiDel" href="javascript:void(0)">
+                                    <i class="fa fa-times" aria-hidden="true"></i>
+                                    批量删除
+                                </a>
+                            </div>
+                            <div class="panel-body">
+                                <a id="createShare" href="javascript:void(0)">
+                                    <i class="fa fa-share-square-o" aria-hidden="true"></i>
+                                    创建分享
+                                </a>
+                            </div>
+                            <div class="panel-body">
+                                <a id="moveTo" href="javascript:void(0)">
+                                    <i class="fa fa-scissors" aria-hidden="true"></i>
+                                    移动到
+                                </a>
+                            </div>
+                            <div class="panel-body">
+                                <a id="myUploadList" href="javascript:void(0)">
+                                    <i class="fa fa-list-ul" aria-hidden="true"></i>
+                                    上传列表
+                                </a>
+                            </div>
+                            <div class="panel-body">
+                                <a id="myOffline" href="javascript:void(0)">
+                                    <i class="fa fa-list-ul" aria-hidden="true"></i>
+                                    离线列表
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a class="btn" href="#collapse1" data-toggle="collapse"
+                                   data-parent="#accordion">网盘</a>
+                            </h4>
+                        </div>
+                        <div id="collapse1" class="panel-collapse collapse">
+                            <div class="panel-body">
+                                <a href="/user/home/index">
+                                    <i class="fa fa-file-text-o" aria-hidden="true"></i>
+                                    我的文件
+                                </a>
+                            </div>
+                            <div class="panel-body">
+                                <a href="/user/home/share">
+                                    <i class="fa fa-share-alt" aria-hidden="true"></i>
+                                    我的分享
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+
+        </div>
+
+        <form action="#" method="post" id="checkBoxForm" hidden></form>
+        <div class="col-sm-10 col-xs-12">
+            <h2 id="pathInfo"><i class="fa fa-home" aria-hidden="true"></i>&nbsp;根目录</h2>
+            <a class="btn btn-primary selectA" id="selectAll" href="javascript:void(0)">全选</a>
+            <a class="btn btn-info selectA" id="selectReverse" href="javascript:void(0)">反选</a>
+            <a class="btn btn-warning selectA" id="selectNone" href="javascript:void(0)">清空</a>
+            <table id="table-dir" class="table table-hover">
+                <thead>
+                <tr>
+                    <th>
+                        <a id="sort-filename" href="javascript:void(0)">文件名</a>
+                    </th>
+                    <th>
+                        <a id="sort-size" href="javascript:void(0)">大小</a>
+                    </th>
+                    <th>
+                        <a id="sort-create" href="javascript:void(0)">创建时间</a>
+                    </th>
+                    <th>
+                        标签
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <div class="row">
+                <div class="col-sm-3 col-xs-2"></div>
+                <div class="col-sm-1 col-xs-1">
+                    <button type="button" id="prevBtn" class="btn btn-primary">上一页</button>
+                </div>
+                <div class="col-sm-4 col-xs-4"></div>
+                <div class="col-sm-1 col-xs-1">
+                    <button type="button" id="nextBtn" class="btn btn-primary">下一页</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<div id="hidden-forms" hidden>
+    <input type="file" id="input-file">
+    <input type="file" id="input-dir" webkitdirectory="">
+</div>
+<div id="statusBars">
+</div>
+<div id="preloadFont" class="checkbox checkbox-primary">
+    <input width="1px" height="1px" id="checkbox2" class="styled" type="checkbox" checked>
+    <label for="checkbox2">
+    </label>
+</div>
+
+<div id="createShare-div" tabindex="-1">
+    <!-- 按钮触发模态框 -->
+    <button hidden id="createShareBtn" data-toggle="modal" data-target="#myModal">开始演示模态框</button>
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel">创建分享</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="btn-group" data-toggle="buttons">
+                        <label class="btn btn-primary active">
+                            <input type="radio" name="options" id="pw-option1"> 无密码
+                        </label>
+                        <label class="btn btn-primary">
+                            <input type="radio" name="options" id="pw-option2"> 有密码
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="closeCreateShareBtn" type="button" class="btn btn-default" data-dismiss="modal">关闭
+                    </button>
+                    <a target="_blank" id="createShareTimeType1" type="button" class="btn btn-primary">创建7天分享</a>
+                    <a target="_blank" id="createShareTimeType2" type="button" class="btn btn-primary">创建长期分享</a>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal -->
+    </div>
+
+</div>
+
+<div id="shareResult" tabindex="-1">
+    <!-- 按钮触发模态框 -->
+    <button hidden id="shareResultBtn" data-toggle="modal" data-target="#myModal0">开始演示模态框</button>
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" id="myModal0" tabindex="-1" role="dialog" aria-labelledby="myModalLabel0"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel0">创建分享结果</h4>
+                </div>
+                <div class="modal-body"><span id="createShareResultText"></span></div>
+                <div class="modal-footer">
+                    <button id="closeShareResultBtn" type="button" class="btn btn-default" data-dismiss="modal">关闭
+                    </button>
+                    <a target="_blank" id="openShareBtn" type="button" class="btn btn-primary">查看分享</a>
+                    <a target="_blank" id="copyShareBtn" data-sort="" type="button" class="btn btn-primary">复制分享</a>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal -->
+    </div>
+
+</div>
+
+<div id="move-div" tabindex="-1">
+    <!-- 按钮触发模态框 -->
+    <button hidden id="showMoveToList" data-toggle="modal" data-target="#myModal1">开始演示模态框</button>
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" id="myModal1" tabindex="-1" role="dialog" aria-labelledby="myModalLabel1"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel1">移动到..</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row" style="margin-bottom: 1em;">
+                        <span id="move-dir_name"
+                              style="margin-left: 1.3em;font-size: 1.2em;margin-top: 0.5em">根目录</span>
+                        <button id="move-upper-dir" style="margin-left: 3em" class="btn btn-primary">向上</button>
+                    </div>
+                    <form class="form-inline" id="createDirInMove">
+                        <div class="form-group">
+                            <input type="text" class="form-control" id="dirNameInMove" placeholder="文件夹名字">
+                            <button type="button" class="btn btn-info" id="createDirInMoveBtn">新建文件夹</button>
+                        </div>
+                    </form>
+                    <div class="row pre-scrollable">
+                        <table id="move-list-table" class="table table-bordered">
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="close-move-to-btn" type="button" class="btn btn-default" data-dismiss="modal">取消
+                    </button>
+                    <button id="confirm-move-btn" type="button" class="btn btn-primary">确认移动</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal -->
+    </div>
+</div>
+
+<div id="create-dir-div" tabindex="-1">
+    <!-- 按钮触发模态框 -->
+    <button hidden id="showCreateDirViewBtn" data-toggle="modal" data-target="#myModal2">开始</button>
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" id="myModal2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel2"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel2">新建文件夹</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="text" id="new-dir-name" class="form-control" autocomplete="off" maxlength="120"
+                           placeholder="文件夹名字">
+                </div>
+                <div class="modal-footer">
+                    <button id="closeCreateDirViewBtn" type="button" class="btn btn-default" data-dismiss="modal">取消
+                    </button>
+                    <button id="confirmCreateDirBtn" type="button" class="btn btn-primary">确定新建</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal -->
+    </div>
+</div>
+
+<div id="rename-div" tabindex="-1">
+    <!-- 按钮触发模态框 -->
+    <button id="showRenameViewBtn" hidden data-toggle="modal" data-target="#myModal3">开始演示模态框</button>
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" id="myModal3" tabindex="-1" role="dialog" aria-labelledby="myModalLabel3"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title" id="myModalLabel3">重命名</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="text" id="rename-dir-name" class="form-control" autocomplete="off" maxlength="120"
+                           placeholder="新名字">
+                    <input type="hidden" id="rename-dir-id">
+                </div>
+                <div class="modal-footer">
+                    <button id="closeRenameViewBtn" type="button" class="btn btn-default" data-dismiss="modal">关闭
+                    </button>
+                    <button id="confirmRenameBtn" type="button" class="btn btn-primary">重命名</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal -->
+    </div>
+</div>
+
+<div id="createOffline" tabindex="-1">
+    <!-- 按钮触发模态框 -->
+    <button id="offlineBtn" hidden data-toggle="modal" data-target="#myModal4">开始演示模态框</button>
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" id="myModal4" tabindex="-1" role="dialog" aria-labelledby="myModalLabel4"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
+                    <h4 class="modal-title" id="myModalLabel4">创建离线下载</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="text" id="offlineUrl" class="form-control" autocomplete="off" placeholder="http地址">
+                </div>
+                <div class="modal-footer">
+                    <button id="closeOfflineBtn" type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <button id="confirmOfflineBtn" type="button" class="btn btn-primary">创建</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal -->
+    </div>
+</div>
+
+<div id="offlineList-div" tabindex="-1">
+    <!-- 按钮触发模态框 -->
+    <button id="offlineListBtn" hidden data-toggle="modal" data-target="#myModal5">开始演示模态框</button>
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" id="myModal5" tabindex="-1" role="dialog" aria-labelledby="myModalLabel5"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
+                    <h4 class="modal-title" id="myModalLabel5">离线列表</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row" style="margin-bottom: 1em;">
+                        <span id="offlineListInfo" style="margin-left: 1.3em;font-size: 1.2em">列表</span>
+                        <button id="getOfflineListBtn" style="margin-left: 3em" class="btn btn-primary">刷新</button>
+                    </div>
+                    <div class="row pre-scrollable">
+                        <table id="offlineList-table" class="table table-hover table-condensed">
+                            <thead>
+                            <tr>
+                                <th>文件名</th>
+                                <th>大小</th>
+                                <th>更新时间</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="closeOfflineListBtn" type="button" class="btn btn-default" data-dismiss="modal">关闭
+                    </button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal -->
+    </div>
+</div>
+
+<div id="uploadList-div" tabindex="-1">
+    <!-- 按钮触发模态框 -->
+    <button id="uploadListBtn" hidden data-toggle="modal" data-target="#myModal6">开始演示模态框</button>
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" id="myModal6" tabindex="-1" role="dialog" aria-labelledby="myModalLabel6"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
+                    <h4 class="modal-title" id="myModalLabel6">上传列表</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row pre-scrollable">
+                        <h3>出错任务</h3>
+                        <table id="uploadList-error-table" class="table table-hover table-condensed">
+                            <thead>
+                            <tr>
+                                <th>文件名</th>
+                                <th>大小</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                        <h3>排队任务</h3>
+                        <table id="uploadList-wait-table" class="table table-hover table-condensed">
+                            <thead>
+                            <tr>
+                                <th>文件名</th>
+                                <th>大小</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="closeUploadListBtn" type="button" class="btn btn-default" data-dismiss="modal">关闭
+                    </button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal -->
+    </div>
+</div>
+
+<div id="editTag-div" tabindex="-1">
+    <!-- 按钮触发模态框 -->
+    <button id="tagBtn" hidden data-toggle="modal" data-target="#myModal7">开始演示模态框</button>
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" id="myModal7" tabindex="-1" role="dialog" aria-labelledby="myModalLabel6"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
+                    <h4 class="modal-title" id="myModalLabel6">编辑标签</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="text" id="rename-tag" class="form-control" autocomplete="off" maxlength="120"
+                           placeholder="新标签">
+                    <input type="hidden" id="rename-tag-file-id">
+                </div>
+                <div class="modal-footer">
+                    <button id="closeTagBtn" type="button" class="btn btn-default" data-dismiss="modal">关闭
+                    </button>
+                    <button id="confirmRenameTagBtn" type="button" class="btn btn-primary">保存</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal -->
+    </div>
+</div>
+
+<div tabindex="-1">
+    <input type="text" id="clipboard">
+</div>
+</body>
+</html>
